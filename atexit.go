@@ -74,14 +74,19 @@ func (d *deferred) runAtExit() {
 // If f panics, atexit considers it to have returned; it will not be called again.
 func Do(f func()) func() {
 	d := &deferred{f: f}
-	// TODO(mperillo): protect with a Mutex.
+
+	mu.Lock()
 	dl = append(dl, d)
+	mu.Unlock()
 
 	return d.runAtDefer
 }
 
 // Registered deferred functions.
-var dl = make([]*deferred, 0, 10)
+var (
+	mu sync.Mutex // guards dl
+	dl = make([]*deferred, 0, 10)
+)
 
 // Exit runs all registered deferred functions, in FIFO order, and then causes
 // the current program to exit with the given status code.
