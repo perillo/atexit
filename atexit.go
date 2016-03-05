@@ -27,14 +27,14 @@ import (
 
 type deferred struct {
 	f    func()
-	m    sync.Mutex
+	mu   sync.Mutex // guards done
 	done uint32
 }
 
 // runAtDefer calls the deferred function during standard deferred mechanism.
 func (d *deferred) runAtDefer() {
-	d.m.Lock()
-	defer d.m.Unlock()
+	d.mu.Lock()
+	defer d.mu.Unlock()
 
 	if d.done == 0 {
 		defer func() {
@@ -48,7 +48,7 @@ func (d *deferred) runAtDefer() {
 // runAtExit calls the deferred function during an abnormal program exit.
 func (d *deferred) runAtExit() {
 	// No need to unlock mutex and update done field.
-	d.m.Lock()
+	d.mu.Lock()
 
 	if d.done == 0 {
 		d.f()
