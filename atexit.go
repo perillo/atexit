@@ -1,7 +1,7 @@
 // Copyright 2015 Manlio Perillo. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
-//
+
 // Package atexit implements support for running deferred functions in case of
 // abnormal exit (in contrast to a normal exit when the program returns from
 // the main function).
