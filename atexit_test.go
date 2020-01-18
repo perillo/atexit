@@ -58,7 +58,7 @@ func TestExit(t *testing.T) {
 
 	wg.Wait()
 	if res.value() != 0 {
-		t.Errorf("the resource was not released: got %d", res.n)
+		t.Error("the resource was not released")
 	}
 }
 
@@ -90,7 +90,7 @@ func TestAbort(t *testing.T) {
 
 	wg.Wait()
 	if res.value() != 0 {
-		t.Errorf("the resource was not released: got %d", res.n)
+		t.Error("the resource was not released")
 	}
 }
 
