@@ -94,6 +94,9 @@ var (
 // control passes to Go runtime.
 func Exit(code int) {
 	func() {
+		mu.Lock()
+		defer mu.Unlock()
+
 		for _, d := range dl {
 			defer d.runAtExit()
 		}
