@@ -1,4 +1,4 @@
-# atexit
+# atexit [![GoDoc](https://godoc.org/github.com/perillo/atexit?status.svg)](http://godoc.org/github.com/perillo/atexit)
 
 Package `atexit` implements support for running deferred functions in case of
 *abnormal exit* (in contrast to a *normal exit* when the program returns from
