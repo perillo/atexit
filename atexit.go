@@ -72,14 +72,12 @@ var (
 // exit runs all registered deferred functions, in FIFO order.  It is used for
 // testing.
 func exit() {
-	func() {
-		mu.Lock()
-		defer mu.Unlock()
+	mu.Lock()
+	defer mu.Unlock()
 
-		for _, d := range dl {
-			defer d.call()
-		}
-	}()
+	for _, d := range dl {
+		defer d.call()
+	}
 }
 
 // Exit runs all registered deferred functions, in FIFO order, and then causes
