@@ -93,3 +93,84 @@ func TestAbort(t *testing.T) {
 		t.Errorf("the resource was not released: got %d", res.n)
 	}
 }
+
+// operation implements two operations that are not commutative.  The value
+// method will return different results depending on whether op1 is called
+// first followed by op2, or op2 is called first followed by op1.
+type operation struct {
+	n int
+}
+
+func (op *operation) op1() {
+	op.n--
+}
+
+func (op *operation) op2() {
+	op.n *= 10
+}
+
+func (op *operation) value() int {
+	return op.n
+}
+
+// TestExitOrder tests that atexit functions are called in the correct order
+// after a normal function termination.
+func TestExitOrder(t *testing.T) {
+	var (
+		op operation
+		wg sync.WaitGroup
+	)
+
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+
+		defer Do(func() {
+			op.op1()
+		})()
+		defer Do(func() {
+			op.op2()
+		})()
+	}()
+
+	wg.Wait()
+	if op.value() != (0*10)-1 {
+		t.Error("the atexit functions where not called in the correct order")
+	}
+}
+
+// TestAbortOrder tests that atexit functions are called in the correct order
+// after an abnormal function termination.
+func TestAbortOrder(t *testing.T) {
+	var (
+		op operation
+		wg sync.WaitGroup
+	)
+
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+
+		// Change the order of operations compared to TestExitOrder, to make
+		// sure the code is actually correct.
+		defer Do(func() {
+			op.op2()
+		})()
+		defer Do(func() {
+			op.op1()
+		})()
+
+		// Sleep to allow an asynchronous abortion.
+		time.Sleep(time.Second)
+	}()
+
+	// Simulate an abort.
+	time.AfterFunc(500*time.Millisecond, func() {
+		exit()
+	})
+
+	wg.Wait()
+	if op.value() != (0-1)*10 {
+		t.Error("the atexit functions where not called in the correct order")
+	}
+}
