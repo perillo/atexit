@@ -88,11 +88,9 @@ var (
 	dl = make([]*deferred, 0, 10)
 )
 
-// Exit runs all registered deferred functions, in FIFO order, and then causes
-// the current program to exit with the given status code.
-// In case one of the deferred functions panics, the exit status is ignored and
-// control passes to Go runtime.
-func Exit(code int) {
+// exit runs all registered deferred functions, in FIFO order.  It is used for
+// testing.
+func exit() {
 	func() {
 		mu.Lock()
 		defer mu.Unlock()
@@ -101,6 +99,13 @@ func Exit(code int) {
 			defer d.runAtExit()
 		}
 	}()
+}
 
+// Exit runs all registered deferred functions, in FIFO order, and then causes
+// the current program to exit with the given status code.
+// In case one of the deferred functions panics, the exit status is ignored and
+// control passes to Go runtime.
+func Exit(code int) {
+	exit()
 	os.Exit(code)
 }
